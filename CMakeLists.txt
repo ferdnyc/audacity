@@ -330,7 +330,7 @@ message( STATUS "  Compiler Standard Required: ${CMAKE_CXX_STANDARD_REQUIRED}" )
 message( STATUS "  Compiler Extensions: ${CMAKE_CXX_EXTENSIONS}" )
 message( STATUS )
 
-if( CMAKE_GENERATOR MATCHES "Visual Studio" )
+if( DEFINED MSVC_VERSION )
    message( STATUS "  MSVC Version: ${MSVC_VERSION}" )
    message( STATUS "  MSVC Toolset: ${MSVC_TOOLSET_VERSION}" )
    message( STATUS )
@@ -381,19 +381,21 @@ message( STATUS )
 # Organize subdirectories/targets into folders for the IDEs
 set_property( GLOBAL PROPERTY USE_FOLDERS ON )
 
-if( CMAKE_GENERATOR MATCHES "Visual Studio" )
+if( CMAKE_SYSTEM_NAME STREQUAL "Windows" )
    # Make sure Audacity is the startup project
    set_directory_properties(
       PROPERTIES
          VS_STARTUP_PROJECT "${CMAKE_PROJECT_NAME}"
    )
 
-   # Build using multiple processors
-   foreach( config ${CMAKE_CONFIGURATION_TYPES} )
-      string( TOUPPER "${config}" config )
-      string( APPEND CMAKE_C_FLAGS_${config} " /MP" )
-      string( APPEND CMAKE_CXX_FLAGS_${config} " /MP" )
-   endforeach()
+   if( CMAKE_C_COMPILER_ID STREQUAL "MSVC" )
+      # Build using multiple processors
+      foreach( config ${CMAKE_CONFIGURATION_TYPES} )
+         string( TOUPPER "${config}" config )
+         string( APPEND CMAKE_C_FLAGS_${config} " /MP" )
+         string( APPEND CMAKE_CXX_FLAGS_${config} " /MP" )
+      endforeach()
+   endif()
 
    # Define system library information, but we'll do the install
    set( CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS_SKIP YES )
